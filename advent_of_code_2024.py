@@ -20,7 +20,7 @@ first. Each puzzle grants one star. Good luck!
 
 from unittest import TestCase, main
 
-# from src.day_01 import puzzle as day_01
+from src.day_01 import puzzle as day_01
 
 
 ################################################################################
@@ -28,9 +28,8 @@ from unittest import TestCase, main
 class TestAdventOfCode2024(TestCase):
 
     def test_advent_of_code_2024(self):
-        pass
-        # self.assertEqual(day_01.puzzle_01(), None)
-        # self.assertEqual(day_01.puzzle_02(), None)
+        self.assertEqual(day_01.puzzle_01(), 2756096)
+        self.assertEqual(day_01.puzzle_02(), 23117829)
 
 ################################################################################
 
