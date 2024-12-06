@@ -23,6 +23,7 @@ from unittest import TestCase, main
 from src.day_01 import puzzle as day_01
 from src.day_02 import puzzle as day_02
 from src.day_03 import puzzle as day_03
+from src.day_06 import puzzle as day_06
 
 
 ################################################################################
@@ -36,6 +37,8 @@ class TestAdventOfCode2024(TestCase):
         self.assertEqual(day_02.puzzle_02(), 418)
         self.assertEqual(day_03.puzzle_01(), 162813399)
         self.assertEqual(day_03.puzzle_02(), 53783319)
+        self.assertEqual(day_06.puzzle_01(), 5312)
+        self.assertEqual(day_06.puzzle_02(), -1)
 
 ################################################################################
 
