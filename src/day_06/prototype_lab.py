@@ -1,5 +1,9 @@
+from typing import Tuple
+
+
 class PrototypeLab:
     INPUT_FILE_PATH = "src/day_06/input.txt"
+    # INPUT_FILE_PATH = "src/day_06/input_test.txt"
     GUARD = "^"
     OBSTRUCTION = "#"
     FREE_SPACE = "."
@@ -43,13 +47,17 @@ class PrototypeLab:
         """
 
         self._map = None
+        self._guard_start_row = None
+        self._guard_start_column = None
         self._guard_row = None
         self._guard_column = None
         self._load_map()
         self._direction = self.START_DIRECTION
+        self._potential_obstructions_positions = None
         self._placed_obstruction_row = None
         self._placed_obstruction_column = None
         self._guard_stuck_in_loop = False
+        self._get_potential_obstructions_positions()
 
 ################################################################################
 
@@ -146,13 +154,28 @@ class PrototypeLab:
 
 ################################################################################
 
+    @property
+    def potential_obstructions_positions(self) -> Tuple[Tuple[int, int]]:
+        """
+
+        :return:
+        """
+
+        return self._potential_obstructions_positions
+
+################################################################################
+
     def walk_guard(self) -> None:
         """
 
         """
 
+        count = 0
         while self.guard_inside_map and not self._guard_stuck_in_loop:
             self._move_guard()
+            count += 1
+            if count == 1000000:
+                self._guard_stuck_in_loop = True
 
 ################################################################################
 
@@ -194,6 +217,8 @@ class PrototypeLab:
                 row = self._map[i]
 
                 if self.GUARD in row:
+                    self._guard_start_row = i
+                    self._guard_start_column = row.index(self.GUARD)
                     self._guard_row = i
                     self._guard_column = row.index(self.GUARD)
                     break
@@ -211,16 +236,45 @@ class PrototypeLab:
         if (0 <= look_ahead_row < self.map_height
                 and 0 <= look_ahead_column < self.map_width):
             look_ahead_place = self._map[look_ahead_row][look_ahead_column]
-            if look_ahead_place == self.OBSTRUCTION:
-                self._direction = self.DIRECTIONS[self._direction][self.TURN]
-            elif look_ahead_place == self._direction:
+            # if self._placed_obstruction_row == 11 and self._placed_obstruction_column == 60:
+            #     visited = (sum(row.count(self.NORTH) for row in self._map) +
+            #                sum(row.count(self.SOUTH) for row in self._map) +
+            #                sum(row.count(self.EAST) for row in self._map) +
+            #                sum(row.count(self.WEST) for row in self._map))
+            #     print(f"{visited}; {self._direction} {look_ahead_place}")
+
+            if look_ahead_place == self._direction:
                 self._guard_stuck_in_loop = True
+            elif look_ahead_place == self.OBSTRUCTION:
+                self._direction = self.DIRECTIONS[self._direction][self.TURN]
+
+                if self._direction == self._map[self._guard_row][self._guard_column]:
+                    self._guard_stuck_in_loop = True
             else:
                 self._guard_row = look_ahead_row
                 self._guard_column = look_ahead_column
+                if self._direction == self._map[self._guard_row][self._guard_column]:
+                    self._guard_stuck_in_loop = True
+
             self._map[self._guard_row][self._guard_column] = self._direction
         else:
             self._guard_row = None
             self._guard_column = None
+
+################################################################################
+
+    def _get_potential_obstructions_positions(self) -> None:
+        """
+
+        :return:
+        """
+
+        self.reset_map()
+        self.walk_guard()
+        self._potential_obstructions_positions = tuple(
+            (row, column)
+            for row in range(self.map_height)
+            for column in range(self.map_width)
+            if self._map[row][column] in (self.NORTH, self.SOUTH, self.EAST, self.WEST))
 
 ################################################################################
