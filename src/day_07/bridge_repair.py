@@ -3,6 +3,7 @@ __email__ = "tofugangsw@gmail.com"
 
 from itertools import product
 from typing import List
+from re import compile
 
 
 class BridgeRepair:
@@ -11,6 +12,8 @@ class BridgeRepair:
     KEY_TEST_VALUE = "TEST_VALUE"
     KEY_OPERANDS = "OPERANDS"
     CALIBRATION_DELIMITER = ":"
+    CONCAT_OPERATOR = "|"
+    PATTERN = compile(r"(\([^\(]*?\))")
 
 ################################################################################
 
@@ -21,12 +24,34 @@ class BridgeRepair:
 
         self._calibrations = None
         self._operators_1 = "+*"
-        self._operators_2 = "+*|"
+        self._operators_2 = f"+*{self.CONCAT_OPERATOR}"
         self._load_calibrations()
 
 ################################################################################
 
-    def total_calibration_result(self) -> int:
+    @property
+    def operators_1(self) -> str:
+        """
+
+        :return:
+        """
+
+        return self._operators_1
+
+################################################################################
+
+    @property
+    def operators_2(self) -> str:
+        """
+
+        :return:
+        """
+
+        return self._operators_2
+
+################################################################################
+
+    def total_calibration_result_1(self) -> int:
         """
 
         :return:
@@ -34,17 +59,61 @@ class BridgeRepair:
 
         total_calibration_result = 0
 
-        for calibration in self._calibrations:
+        for i in range(len(self._calibrations)):
+            calibration = self._calibrations[i]
             test_value = calibration[self.KEY_TEST_VALUE]
             operands = calibration[self.KEY_OPERANDS]
             operators_combinations = list(
                 list(combination)
                 for combination in product(self._operators_1, repeat=len(operands) - 1))
 
-            for combination in tuple(operators_combinations):
+            for j in range(len(tuple(operators_combinations))):
+                print(f"calibration {i}/{len(self._calibrations)} combination {j}/{len(tuple(operators_combinations))}")
+                combination = tuple(operators_combinations)[j]
+
                 if self._is_equation_true(operands, combination, test_value):
                     total_calibration_result += test_value
                     break
+
+        return total_calibration_result
+
+################################################################################
+
+    def total_calibration_result_2(self) -> int:
+        """
+
+        :return:
+        """
+
+        total_calibration_result = 0
+
+        for i in range(len(self._calibrations)):
+            calibration = self._calibrations[i]
+            test_value = calibration[self.KEY_TEST_VALUE]
+            operands = calibration[self.KEY_OPERANDS]
+            operators_combinations = list(
+                list(combination)
+                for combination in product(self._operators_1, repeat=len(operands) - 1))
+
+            for j in range(len(tuple(operators_combinations))):
+                print(f"calibration {i}/{len(self._calibrations)} combination {j}/{len(tuple(operators_combinations))}")
+                combination = tuple(operators_combinations)[j]
+
+                if self._is_equation_true(operands, combination, test_value):
+                    total_calibration_result += test_value
+                    break
+            else:
+                operators_combinations = list(
+                    list(combination)
+                    for combination in
+                    product(self._operators_2, repeat=len(operands) - 1))
+                for j in range(len(tuple(operators_combinations))):
+                    print(f"calibration {i}/{len(self._calibrations)} combination {j}/{len(tuple(operators_combinations))}")
+                    combination = tuple(operators_combinations)[j]
+
+                    if self._is_equation_true(operands, combination, test_value):
+                        total_calibration_result += test_value
+                        break
 
         return total_calibration_result
 
@@ -77,12 +146,26 @@ class BridgeRepair:
         """
 
         operands = operands.copy()
+        operators = operators.copy()
         equation = f"{operands.pop(0)}"
 
         while len(operands) > 0 and len(operators) > 0:
             equation = f"({equation}{operators.pop(0)}{operands.pop(0)})"
-        result = eval(equation)
 
-        return result == test_value
+        result = -1
+        while True:
+            try:
+                segment = self.PATTERN.findall(equation)[0]
+                if self.CONCAT_OPERATOR in segment:
+                    result = eval("".join(map(lambda element: element.strip(), segment.split(self.CONCAT_OPERATOR))))
+                else:
+                    result = eval(segment)
+
+                if result > test_value:
+                    return False
+                else:
+                    equation = equation.replace(segment, str(result))
+            except IndexError:
+                return result == test_value
 
 ################################################################################

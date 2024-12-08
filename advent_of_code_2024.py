@@ -44,7 +44,7 @@ class TestAdventOfCode2024(TestCase):
         self.assertEqual(day_05.puzzle_01(), 4905)
         self.assertEqual(day_05.puzzle_02(), 6204)
         self.assertEqual(day_07.puzzle_01(), 12553187650171)
-        self.assertEqual(day_07.puzzle_02(), -1)
+        self.assertEqual(day_07.puzzle_02(), 96779702119491)
 
 ################################################################################
 

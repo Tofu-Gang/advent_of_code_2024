@@ -16,7 +16,7 @@ def puzzle_01() -> int:
     """
 
     bridge_repair = BridgeRepair()
-    return bridge_repair.total_calibration_result()
+    return bridge_repair.total_calibration_result_1()
 
 
 ################################################################################
@@ -26,6 +26,7 @@ def puzzle_02() -> int:
     :return:
     """
 
-    return -1
+    bridge_repair = BridgeRepair()
+    return bridge_repair.total_calibration_result_2()
 
 ################################################################################
