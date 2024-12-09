@@ -73,6 +73,104 @@ def _defragment_blocks(blocks: List[str]) -> List[str]:
 
 ################################################################################
 
+def _defragment_files(blocks: List[str]) -> List[str]:
+    """
+    
+    :param blocks: 
+    :return: 
+    """
+
+    for i in reversed(range(len(blocks))):
+        block = blocks[i]
+
+        if block == ".":
+            continue
+        else:
+            file_id = blocks[i]
+            file_size = _file_size(i, blocks)
+            # print(f"FILE_ID: {file_id} FILE_SIZE: {file_size}")
+            free_space_index = blocks.index(".")
+            free_space_size = _free_space_size(free_space_index, blocks)
+
+            if free_space_index < i:
+                while free_space_size < file_size:
+                    free_space_index = blocks.index(".", free_space_index + free_space_size)
+                    free_space_size = _free_space_size(free_space_index, blocks)
+
+                    if free_space_index > i:
+                        free_space_index = None
+                        free_space_size = None
+                        break
+                # print(f"FREE_SPACE_INDEX: {free_space_index} FREE_SPACE_SIZE: {free_space_size}")
+
+                if free_space_index is not None and free_space_size is not None:
+                    for j in range(free_space_index, free_space_index + file_size):
+                        blocks[j] = file_id
+                    for j in range(i - file_size + 1, i + 1):
+                        blocks[j] = "."
+                # print("".join(blocks))
+            else:
+                break
+
+    return blocks
+
+
+################################################################################
+
+def _free_space_size(start_index: int, blocks: List[str]) -> int:
+    """
+
+    :param start_index:
+    :return:
+    """
+
+    if blocks[start_index] == ".":
+        free_space_size = 1
+        i = start_index + 1
+        while i < len(blocks) and blocks[i] == ".":
+            i += 1
+            free_space_size += 1
+
+        i = start_index - 1
+        while i >= 0 and blocks[i] == ".":
+            free_space_size += 1
+            i -= 1
+
+        return free_space_size
+    else:
+        return 0
+
+
+################################################################################
+
+def _file_size(start_index: int, blocks: List[str]) -> int:
+    """
+
+    :param start_index:
+    :param blocks:
+    :return:
+    """
+
+    if blocks[start_index].isnumeric():
+        file_id = blocks[start_index]
+        file_size = 1
+        i = start_index + 1
+        while i < len(blocks) and blocks[i] == file_id:
+            i += 1
+            file_size += 1
+
+        i = start_index - 1
+        while i >= 0 and blocks[i] == file_id:
+            file_size += 1
+            i -= 1
+
+        return file_size
+    else:
+        return 0
+
+
+################################################################################
+
 def _filesystem_checksum(blocks: List[str]) -> int:
     """
 
@@ -80,7 +178,9 @@ def _filesystem_checksum(blocks: List[str]) -> int:
     :return:
     """
 
-    return sum(i * int(blocks[i]) for i in range(blocks.index(".")))
+    return sum(i * int(blocks[i])
+               for i in range(len(blocks))
+               if blocks[i].isnumeric())
 
 
 ################################################################################
@@ -103,6 +203,10 @@ def puzzle_02() -> int:
     :return:
     """
 
-    return -1
+    disk_map = _load_disk_map()
+    blocks = _get_blocks(disk_map)
+    # print("".join(blocks))
+    blocks = _defragment_files(blocks)
+    return _filesystem_checksum(blocks)
 
 ################################################################################

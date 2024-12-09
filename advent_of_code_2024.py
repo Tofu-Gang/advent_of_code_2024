@@ -49,6 +49,6 @@ from src.day_09 import puzzle as day_09
 
 if __name__ == '__main__':
     # main()
-    print(day_09.puzzle_01())
+    print(day_09.puzzle_02())
 
 ################################################################################
