@@ -18,7 +18,7 @@ in the Advent calendar; the second puzzle is unlocked when you complete the
 first. Each puzzle grants one star. Good luck!
 """
 
-# from unittest import TestCase, main
+from unittest import TestCase, main
 
 from src.day_01 import puzzle as day_01
 from src.day_02 import puzzle as day_02
@@ -30,25 +30,26 @@ from src.day_09 import puzzle as day_09
 
 ################################################################################
 
-# class TestAdventOfCode2024(TestCase):
-#
-#     def test_advent_of_code_2024(self):
-#         self.assertEqual(day_01.puzzle_01(), 2756096)
-#         self.assertEqual(day_01.puzzle_02(), 23117829)
-#         self.assertEqual(day_02.puzzle_01(), 359)
-#         self.assertEqual(day_02.puzzle_02(), 418)
-#         self.assertEqual(day_03.puzzle_01(), 162813399)
-#         self.assertEqual(day_03.puzzle_02(), 53783319)
-#         self.assertEqual(day_04.puzzle_01(), 2447)
-#         self.assertEqual(day_04.puzzle_02(), 1868)
-#         self.assertEqual(day_05.puzzle_01(), 4905)
-#         self.assertEqual(day_05.puzzle_02(), 6204)
+class TestAdventOfCode2024(TestCase):
+
+    def test_advent_of_code_2024(self):
+        # self.assertEqual(day_01.puzzle_01(), 2756096)
+        # self.assertEqual(day_01.puzzle_02(), 23117829)
+        # self.assertEqual(day_02.puzzle_01(), 359)
+        # self.assertEqual(day_02.puzzle_02(), 418)
+        # self.assertEqual(day_03.puzzle_01(), 162813399)
+        # self.assertEqual(day_03.puzzle_02(), 53783319)
+        # self.assertEqual(day_04.puzzle_01(), 2447)
+        # self.assertEqual(day_04.puzzle_02(), 1868)
+        # self.assertEqual(day_05.puzzle_01(), 4905)
+        # self.assertEqual(day_05.puzzle_02(), 6204)
+        self.assertEqual(day_09.puzzle_01(), 6446899523367)
+        self.assertEqual(day_09.puzzle_02(), 6478232739671)
 
 ################################################################################
 
 
 if __name__ == '__main__':
-    # main()
-    print(day_09.puzzle_02())
+    main()
 
 ################################################################################
