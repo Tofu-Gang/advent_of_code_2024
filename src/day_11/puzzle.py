@@ -25,35 +25,27 @@ def _load_stones() -> List[int]:
 
 ################################################################################
 
-def _blink(stones: List[int]) -> List[int]:
+def _process_stone(stone: int, result: int, blinks: int, goal: int) -> int:
     """
 
-    :param stones:
+    :param stone:
+    :param result:
+    :param blinks:
     :return:
     """
 
-    i = 0
-
-    while True:
-        stone = stones[i]
-
-        if stone == 0:
-            stones[i] = 1
-            i += 1
-        elif len(str(stone)) % 2 == 0:
-            left = int(str(stone)[:int(len(str(stone)) / 2)])
-            right = int(str(stone)[int(len(str(stone)) / 2):])
-            stones[i] = left
-            stones.insert(i + 1, right)
-            i += 2
-        else:
-            stones[i] = stone * 2024
-            i += 1
-
-        if i == len(stones):
-            break
-
-    return stones
+    if blinks == goal:
+        return result
+    elif stone == 0:
+        return _process_stone(1, result, blinks + 1, goal)
+    elif len(str(stone)) % 2 == 0:
+        half = int(len(str(stone)) / 2)
+        left = int(str(stone)[:half])
+        right = int(str(stone)[half:])
+        return (_process_stone(left, result, blinks + 1, goal)
+                + _process_stone(right, result, blinks + 1, goal))
+    else:
+        return _process_stone(stone * 2024, result, blinks + 1, goal)
 
 
 ################################################################################
@@ -65,12 +57,10 @@ def puzzle_01() -> int:
     """
 
     stones = _load_stones()
-
-    for i in range(25):
-        print(i)
-        stones = _blink(stones)
-    print(len(stones))
-    return -1
+    result = 0
+    for stone in stones:
+        result += _process_stone(stone, 1, 0, 25)
+    return result
 
 
 ################################################################################
