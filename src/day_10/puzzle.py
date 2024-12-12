@@ -27,6 +27,8 @@ def puzzle_02() -> int:
     :return:
     """
 
-    return -1
+    topographic_map = TopographicMap()
+    topographic_map.make_trails()
+    return topographic_map.ratings_sum
 
 ################################################################################

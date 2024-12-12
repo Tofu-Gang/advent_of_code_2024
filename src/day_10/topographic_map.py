@@ -4,7 +4,6 @@ from .node import Node
 
 class TopographicMap:
     INPUT_FILE_PATH = "src/day_10/input.txt"
-    # INPUT_FILE_PATH = "src/day_10/input_test.txt"
     TRAILHEAD_HEIGHT = 0
 
 ################################################################################
@@ -19,6 +18,7 @@ class TopographicMap:
         self._height = -1
         self._trailheads = []
         self._scores = dict()
+        self._ratings = dict()
         self._load_map()
         self._load_trailheads()
 
@@ -32,6 +32,17 @@ class TopographicMap:
         """
 
         return sum(len(self._scores[trailhead]) for trailhead in self._scores)
+
+################################################################################
+
+    @property
+    def ratings_sum(self) -> int:
+        """
+
+        :return:
+        """
+
+        return sum(self._ratings[trailhead] for trailhead in self._ratings)
 
 ################################################################################
 
@@ -59,10 +70,10 @@ class TopographicMap:
 
         if height == 9:
             trailhead = node.trailhead
-            if (trailhead.row, trailhead.column) not in self._scores:
-                self._scores[(trailhead.row, trailhead.column)] = []
             if (row, column) not in self._scores[(trailhead.row, trailhead.column)]:
                 self._scores[(trailhead.row, trailhead.column)].append((row, column))
+            self._ratings[(trailhead.row, trailhead.column)] += 1
+
         else:
             for neighbour in neighbours:
                 neighbour_row = neighbour[0]
@@ -103,6 +114,8 @@ class TopographicMap:
                 height = self._topographic_map[row][column]
                 if height == self.TRAILHEAD_HEIGHT:
                     self._trailheads.append(Node(row, column, None))
+                    self._scores[(row, column)] = []
+                    self._ratings[(row, column)] = 0
 
 ################################################################################
 
