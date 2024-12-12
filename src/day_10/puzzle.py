@@ -5,7 +5,6 @@ __email__ = "tofugangsw@gmail.com"
 
 """
 
-from typing import List, Tuple
 from .topographic_map import TopographicMap
 
 
@@ -17,8 +16,8 @@ def puzzle_01() -> int:
     """
 
     topographic_map = TopographicMap()
-    print(topographic_map.trailheads)
-    return -1
+    topographic_map.make_trails()
+    return topographic_map.scores_sum
 
 
 ################################################################################

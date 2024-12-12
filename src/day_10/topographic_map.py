@@ -1,9 +1,10 @@
-from typing import Dict, Tuple
+from typing import Tuple, List
+from .node import Node
 
 
 class TopographicMap:
-    # INPUT_FILE_PATH = "src/day_10/input.txt"
-    INPUT_FILE_PATH = "src/day_10/input_test.txt"
+    INPUT_FILE_PATH = "src/day_10/input.txt"
+    # INPUT_FILE_PATH = "src/day_10/input_test.txt"
     TRAILHEAD_HEIGHT = 0
 
 ################################################################################
@@ -16,21 +17,21 @@ class TopographicMap:
         self._topographic_map = None
         self._width = -1
         self._height = -1
-        self._trailheads = dict()
-        self._hiking_trails = []
+        self._trailheads = []
+        self._scores = dict()
         self._load_map()
         self._load_trailheads()
 
 ################################################################################
 
     @property
-    def trailheads(self) -> Dict[Tuple[int, int], int]:
+    def scores_sum(self) -> int:
         """
 
         :return:
         """
 
-        return self._trailheads
+        return sum(len(self._scores[trailhead]) for trailhead in self._scores)
 
 ################################################################################
 
@@ -40,7 +41,42 @@ class TopographicMap:
         :return:
         """
 
-        pass
+        for trailhead in self._trailheads:
+            self._process_node(trailhead)
+
+################################################################################
+
+    def _process_node(self, node) -> None:
+        """
+
+        :param node:
+        """
+
+        row = node.row
+        column = node.column
+        height = self._topographic_map[row][column]
+        neighbours = self._get_neighbours(row, column)
+
+        if height == 9:
+            trailhead = node.trailhead
+            if (trailhead.row, trailhead.column) not in self._scores:
+                self._scores[(trailhead.row, trailhead.column)] = []
+            if (row, column) not in self._scores[(trailhead.row, trailhead.column)]:
+                self._scores[(trailhead.row, trailhead.column)].append((row, column))
+        else:
+            for neighbour in neighbours:
+                neighbour_row = neighbour[0]
+                neighbour_column = neighbour[1]
+                neighbour_height = self._topographic_map[neighbour_row][neighbour_column]
+
+                if neighbour_height - 1 == height:
+                    node.add_child(Node(neighbour_row, neighbour_column, node))
+
+            if len(node.children) == 0:
+                pass
+            else:
+                for child in node.children:
+                    self._process_node(child)
 
 ################################################################################
 
@@ -66,11 +102,11 @@ class TopographicMap:
             for column in range(self._width):
                 height = self._topographic_map[row][column]
                 if height == self.TRAILHEAD_HEIGHT:
-                    self._trailheads[(row, column)] = 0
+                    self._trailheads.append(Node(row, column, None))
 
 ################################################################################
 
-    def _get_neighbours(self, row: int, column: int) -> Tuple[Tuple[int, int]]:
+    def _get_neighbours(self, row: int, column: int) -> List[Tuple[int, int]]:
         """
 
         :param row:
@@ -91,6 +127,6 @@ class TopographicMap:
         if column < self._width - 1:
             # right
             neighbours.append((row, column + 1))
-        return tuple(neighbours)
+        return neighbours
 
 ################################################################################
