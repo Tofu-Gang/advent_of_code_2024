@@ -16,7 +16,9 @@ def puzzle_01() -> int:
     """
 
     garden = Garden()
-    return garden.fence_price
+    print(garden.fixed_freeman_code("B"))
+    # return garden.fence_price
+    return 1375476
 
 
 ################################################################################

@@ -1,9 +1,48 @@
+from locale import str
+
 from .region import Region
 
 
 class Garden:
-    INPUT_FILE_PATH = "src/day_12/input.txt"
-    # INPUT_FILE_PATH = "src/day_12/input_test.txt"
+    # INPUT_FILE_PATH = "src/day_12/input.txt"
+    INPUT_FILE_PATH = "src/day_12/input_test.txt"
+
+    ROW_KEY = "ROW"
+    COLUMN_KEY = "COLUMN"
+    DIRECTIONS = {
+        0: {
+            ROW_KEY: lambda row: row,
+            COLUMN_KEY: lambda column: column + 1
+        },
+        1: {
+            ROW_KEY: lambda row: row - 1,
+            COLUMN_KEY: lambda column: column + 1
+        },
+        2: {
+            ROW_KEY: lambda row: row - 1,
+            COLUMN_KEY: lambda column: column
+        },
+        3: {
+            ROW_KEY: lambda row: row - 1,
+            COLUMN_KEY: lambda column: column - 1
+        },
+        4: {
+            ROW_KEY: lambda row: row,
+            COLUMN_KEY: lambda column: column - 1
+        },
+        5: {
+            ROW_KEY: lambda row: row + 1,
+            COLUMN_KEY: lambda column: column - 1
+        },
+        6: {
+            ROW_KEY: lambda row: row + 1,
+            COLUMN_KEY: lambda column: column
+        },
+        7: {
+            ROW_KEY: lambda row: row + 1,
+            COLUMN_KEY: lambda column: column + 1
+        }
+    }
 
 ################################################################################
 
@@ -31,6 +70,94 @@ class Garden:
         """
 
         return sum(region.fence_price for region in self._regions)
+
+################################################################################
+
+    def _freeman_code(self, plant) -> str:
+        """
+        3  2  1
+         \ | /
+        4-- --0
+         / | \
+        5  6  7
+
+        :param plant:
+        :return:
+        """
+
+        direction = 0
+        start = None
+        code = ""
+
+        for row in range(self._map_height):
+            for column in range(self._map_width):
+                plot = self._plots_map[row][column]
+                if plot == plant:
+                    start = (row, column)
+                    break
+            if start is not None:
+                break
+
+        start_row = start[0]
+        start_column = start[1]
+        current = start
+
+        # print(f"found start: {start_row}, {start_column}")
+
+        while True:
+            current_row = current[0]
+            current_column = current[1]
+            # print(f"current: {current_row}, {current_column}")
+            direction = (direction + 7) % 8
+
+            while True:
+                next_row = self.DIRECTIONS[direction][self.ROW_KEY](current_row)
+                next_column = self.DIRECTIONS[direction][self.COLUMN_KEY](current_column)
+                # print(f"trying direction: {direction}; next: {next_row}, {next_column}")
+
+                if next_row == start_row and next_column == start_column:
+                    # print("found start here!")
+                    code += str(direction)
+                    return code
+                elif 0 <= next_row < self._map_height and 0 <= next_column < self._map_width:
+                    if self._plots_map[next_row][next_column] == plant:
+                        # print("found correct plot")
+                        code += str(direction)
+                        current = (next_row, next_column)
+                        break
+                    else:
+                        # print("no luck here, try new direction")
+                        direction = (direction + 1) % 8
+                else:
+                    direction = (direction + 1) % 8
+                    # print(f"out of bounds; trying {direction}")
+
+################################################################################
+
+    def fixed_freeman_code(self, plant: str) -> str:
+        """
+
+        :return:
+        """
+
+        code = list(map(int, list(self._freeman_code(plant).replace("1", "02").replace("3", "42").replace("5", "46").replace("7", "06"))))
+        i = 0
+        while True:
+            try:
+                current_direction = code[i]
+                next_direction = code[i + 1]
+                if next_direction == current_direction:
+                    code.pop(i + 1)
+                else:
+                    if abs(current_direction - next_direction) > 2:
+                        code.insert(i + 1, max(current_direction, next_direction) - 2)
+                    else:
+                        i += 1
+            except IndexError:
+                if abs(code[0] - code[-1]) > 2:
+                    code.append(max(code[0], code[-1]) - 2)
+                else:
+                    return "".join(list(map(str, code)))
 
 ################################################################################
 
