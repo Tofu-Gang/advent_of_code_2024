@@ -25,6 +25,7 @@ from src.day_02 import puzzle as day_02
 from src.day_03 import puzzle as day_03
 from src.day_04 import puzzle as day_04
 from src.day_05 import puzzle as day_05
+from src.day_14 import puzzle as day_14
 
 
 ################################################################################
@@ -42,6 +43,8 @@ class TestAdventOfCode2024(TestCase):
         self.assertEqual(day_04.puzzle_02(), 1868)
         self.assertEqual(day_05.puzzle_01(), 4905)
         self.assertEqual(day_05.puzzle_02(), 6204)
+        self.assertEqual(day_14.puzzle_01(), 225552000)
+        self.assertEqual(day_14.puzzle_02(), 7371)
 
 ################################################################################
 
