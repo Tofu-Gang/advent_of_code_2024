@@ -28,9 +28,7 @@ def puzzle_02() -> int:
     """
 
     warehouse = Warehouse(Warehouse.MAP_ELEMENTS_WIDE)
-    warehouse.print_map()
     warehouse.process_instructions()
-    # print(warehouse.gps_coordinates_sum)
-    return -1
+    return warehouse.gps_coordinates_sum
 
 ################################################################################
