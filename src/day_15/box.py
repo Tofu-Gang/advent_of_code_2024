@@ -4,7 +4,7 @@ __email__ = "tofugangsw@gmail.com"
 
 class Box:
 
-    def __init__(self, row: int, column: int):
+    def __init__(self, row: int, column: int, width: int):
         """
 
         :param row:
@@ -13,6 +13,7 @@ class Box:
 
         self._row = row
         self._column = column
+        self._width = width
 
 ################################################################################
 
@@ -35,6 +36,17 @@ class Box:
         """
 
         return self._column
+
+################################################################################
+
+    @property
+    def width(self) -> int:
+        """
+
+        :return:
+        """
+
+        return self._width
 
 ################################################################################
 

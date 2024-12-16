@@ -6,13 +6,33 @@ from .robot import Robot
 
 
 class Warehouse:
-    INPUT_FILE_PATH = "src/day_15/input.txt"
-    # INPUT_FILE_PATH = "src/day_15/input_test.txt"
+    # INPUT_FILE_PATH = "src/day_15/input.txt"
+    INPUT_FILE_PATH = "src/day_15/input_test.txt"
     # INPUT_FILE_PATH = "src/day_15/input_test_small.txt"
+    MAP_ELEMENTS_NORMAL = "NORMAL"
+    MAP_ELEMENTS_WIDE = "WIDE"
+    # what is in the input file
     WALL = "#"
     BOX = "O"
     ROBOT = "@"
     EMPTY_SPACE = "."
+
+    MAP_ELEMENTS = {
+        # what goes in the map
+        MAP_ELEMENTS_NORMAL: {
+            WALL: "#",
+            BOX: "O",
+            ROBOT: "@",
+            EMPTY_SPACE: "."
+        },
+        MAP_ELEMENTS_WIDE: {
+            WALL: "##",
+            BOX: "[]",
+            ROBOT: "@.",
+            EMPTY_SPACE: ".."
+        }
+    }
+
     RIGHT = ">"
     UP = "^"
     LEFT = "<"
@@ -20,11 +40,12 @@ class Warehouse:
 
 ################################################################################
 
-    def __init__(self):
+    def __init__(self, map_elements: str):
         """
 
         """
 
+        self._map_elements = self.MAP_ELEMENTS[map_elements]
         self._map = []
         self._boxes = []
         self._robot = None
@@ -52,9 +73,10 @@ class Warehouse:
 
         map_copy = list(line.copy() for line in self._map)
         map_copy[self._robot.row][self._robot.column] = self.ROBOT
+        box_width = len(self._map_elements[self.BOX])
 
         for box in self._boxes:
-            map_copy[box.row][box.column] = self.BOX
+            map_copy[box.row][box.column:box.column + box_width] = list(self._map_elements[self.BOX])
         for line in map_copy:
             print("".join(line))
 
@@ -78,21 +100,23 @@ class Warehouse:
         with open(self.INPUT_FILE_PATH, "r") as f:
             contents = f.read().strip().split("\n\n")
             warehouse_map = contents[0].strip().split("\n")
+            box_width = len(self._map_elements[self.BOX])
+
             for i in range(len(warehouse_map)):
                 line = warehouse_map[i]
                 self._map.append([])
 
                 for j in range(len(line.strip())):
-                    space = line[j]
+                    map_element = line[j]
 
-                    if space == self.WALL or space == self.EMPTY_SPACE:
-                        self._map[i].append(line[j])
-                    elif space == self.ROBOT:
-                        self._robot = Robot(i, j)
-                        self._map[i].append(self.EMPTY_SPACE)
-                    elif space == self.BOX:
-                        self._boxes.append(Box(i, j))
-                        self._map[i].append(self.EMPTY_SPACE)
+                    if map_element == self.WALL or map_element == self.EMPTY_SPACE:
+                        self._map[i] += list(self._map_elements[map_element])
+                    elif map_element == self.ROBOT:
+                        self._robot = Robot(i, j * box_width)
+                        self._map[i] += list(self._map_elements[self.EMPTY_SPACE])
+                    elif map_element == self.BOX:
+                        self._boxes.append(Box(i, j * box_width, box_width))
+                        self._map[i] += list(self._map_elements[self.EMPTY_SPACE])
 
             self._instructions = list(contents[1].strip())
 
