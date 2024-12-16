@@ -5,7 +5,7 @@ __email__ = "tofugangsw@gmail.com"
 
 """
 
-INPUT_FILE_PATH = "src/day_15/input.txt"
+from .warehouse import Warehouse
 
 
 ################################################################################
@@ -15,7 +15,9 @@ def puzzle_01() -> int:
     :return:
     """
 
-    return -1
+    warehouse = Warehouse()
+    warehouse.process_instructions()
+    return warehouse.gps_coordinates_sum
 
 
 ################################################################################
