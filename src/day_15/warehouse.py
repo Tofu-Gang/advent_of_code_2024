@@ -7,8 +7,9 @@ from .robot import Robot
 
 class Warehouse:
     # INPUT_FILE_PATH = "src/day_15/input.txt"
-    INPUT_FILE_PATH = "src/day_15/input_test.txt"
+    # INPUT_FILE_PATH = "src/day_15/input_test.txt"
     # INPUT_FILE_PATH = "src/day_15/input_test_small.txt"
+    INPUT_FILE_PATH = "src/day_15/input_test_2.txt"
     MAP_ELEMENTS_NORMAL = "NORMAL"
     MAP_ELEMENTS_WIDE = "WIDE"
     # what is in the input file
@@ -16,9 +17,8 @@ class Warehouse:
     BOX = "O"
     ROBOT = "@"
     EMPTY_SPACE = "."
-
+    # what goes in the map
     MAP_ELEMENTS = {
-        # what goes in the map
         MAP_ELEMENTS_NORMAL: {
             WALL: "#",
             BOX: "O",
@@ -128,31 +128,42 @@ class Warehouse:
         """
 
         instruction = self._instructions.pop(0)
+        print(instruction)
         row = self._robot.row
         column = self._robot.column
         objects_to_move = [self._robot]
 
+        if instruction == self.RIGHT:
+            column += 1
+        elif instruction == self.LEFT:
+            column -= 1
+        elif instruction == self.UP:
+            row -= 1
+        elif instruction == self.DOWN:
+            row += 1
+
         while True:
-            if instruction == self.RIGHT:
-                column += 1
-            elif instruction == self.LEFT:
-                column -= 1
-            elif instruction == self.UP:
-                row -= 1
-            elif instruction == self.DOWN:
-                row += 1
+            box = self._get_box(row, column)
+            if box is not None:
+                if self._can_box_be_moved(box, instruction):
+                    objects_to_move.append(box)
 
-            neighbour = self._map[row][column]
-
-            try:
-                objects_to_move.append(next(filter(
-                    lambda box: box.row == row and box.column == column,
-                    self._boxes)))
-            except StopIteration:
-                if neighbour == self.WALL:
+                    if instruction == self.RIGHT:
+                        column += box.width
+                    elif instruction == self.LEFT:
+                        column -= box.width
+                    elif instruction == self.UP:
+                        row -= 1
+                    elif instruction == self.DOWN:
+                        row += 1
+                else:
                     objects_to_move.clear()
                     break
-                elif neighbour == self.EMPTY_SPACE:
+            else:
+                if self._map[row][column] == self.WALL:
+                    objects_to_move.clear()
+                    break
+                elif self._map[row][column] == self.EMPTY_SPACE:
                     break
 
         for object_to_move in objects_to_move:
@@ -164,5 +175,57 @@ class Warehouse:
                 object_to_move.move_up()
             elif instruction == self.DOWN:
                 object_to_move.move_down()
+        self.print_map()
+
+################################################################################
+
+    def _get_box(self, row: int, column: int) -> Box | None:
+        """
+
+        :param row:
+        :param column:
+        :return:
+        """
+
+        try:
+            return next(filter(
+                lambda box:
+                box.row == row and
+                (box.column == column or box.column + box.width - 1 == column),
+                self._boxes))
+        except StopIteration:
+            return None
+
+################################################################################
+
+    def _can_box_be_moved(self, box: Box, direction: str) -> bool:
+        """
+
+        :param box:
+        :param direction:
+        :return:
+        """
+
+        row = box.row
+        column = box.column
+
+        if direction == self.RIGHT:
+            column = box.column + box.width
+        elif direction == self.LEFT:
+            column = box.column - 1
+        elif direction == self.UP:
+            row = box.row - 1
+        elif direction == self.DOWN:
+            row = box.row + 1
+
+        if self._map[row][column] == self.WALL:
+            return False
+        else:
+            try:
+                box = self._get_box(row, column)
+                return self._can_box_be_moved(box, direction)
+            except AttributeError:
+                return True
+
 
 ################################################################################
