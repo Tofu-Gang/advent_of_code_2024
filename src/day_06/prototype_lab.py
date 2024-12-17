@@ -56,72 +56,86 @@ class PrototypeLab:
         self._guard_stuck_in_loop = False
         self._new_visited_tiles = -1
 
-        self._load_map()
-        self._potential_obstructions_positions = None
+        self._relevant_obstructions_positions = None
         self._placed_obstruction_row = None
         self._placed_obstruction_column = None
-        self._get_potential_obstructions_positions()
+
+        self._load_map()
+        self._get_relevant_obstructions_positions()
 
 ################################################################################
 
     @property
-    def _guard_inside_map(self) -> bool:
+    def visited_position_count(self) -> int:
         """
 
         :return:
         """
 
-        return self._guard_row is not None and self._guard_column is not None
+        return sum("".join(row).count(symbol)
+                   for row in self._map
+                   for symbol in self.DIRECTIONS)
 
 ################################################################################
 
-    @property
-    def guard_stuck_in_loop(self) -> bool:
+    def make_round(self) -> None:
+        """
+
+        """
+
+        while True:
+            directions = self.DIRECTIONS[self._direction]
+            next_row = directions[self.MOVE_ROW](self._guard_row)
+            next_column = directions[self.MOVE_COLUMN](self._guard_column)
+
+            if 0 <= next_row < self._height and 0 <= next_column < self._width:
+                next_tile = self._map[next_row][next_column]
+
+                if next_tile == self._direction:
+                    self._guard_stuck_in_loop = True
+                    break
+                elif next_tile == self.OBSTRUCTION:
+                    self._direction = directions[self.TURN]
+                else:
+                    self._guard_row = next_row
+                    self._guard_column = next_column
+
+                    if self._guard_row == self._guard_start_row and self._guard_column == self._guard_start_column:
+                        if self._new_visited_tiles == 0:
+                            self._guard_stuck_in_loop = True
+                            break
+                        else:
+                            self._new_visited_tiles = 0
+                    if next_tile == self.FREE_SPACE:
+                        self._new_visited_tiles += 1
+                    self._map[self._guard_row][
+                        self._guard_column] = self._direction
+            else:
+                # guard stepped outside the map
+                break
+
+################################################################################
+
+    def make_rounds_with_new_obstructions(self) -> int:
         """
 
         :return:
         """
 
-        return self._guard_stuck_in_loop
+        solutions_count = 0
+
+        for obstruction_position in self._relevant_obstructions_positions:
+            self._place_obstruction(obstruction_position[0], obstruction_position[1])
+            self.make_round()
+
+            if self._guard_stuck_in_loop:
+                solutions_count += 1
+            self._reset_map()
+        return solutions_count
 
 ################################################################################
 
-    @property
-    def visited_positions_count(self) -> int:
-        """
-
-        :return:
-        """
-
-        return sum(
-            "".join(row).count(symbol)
-            for row in self._map
-            for symbol in self.DIRECTIONS)
-
-################################################################################
-
-    @property
-    def potential_obstructions_positions(self) -> Tuple[Tuple[int, int]]:
-        """
-
-        :return:
-        """
-
-        return self._potential_obstructions_positions
-
-################################################################################
-
-    def walk_guard(self) -> None:
-        """
-
-        """
-
-        while self._guard_inside_map and not self._guard_stuck_in_loop:
-            self._move_guard()
-
-################################################################################
-
-    def place_obstruction(self, row: int, column: int) -> None:
+    def _place_obstruction(self, row: int, column: int) -> None:
         """
 
         :param row:
@@ -134,7 +148,7 @@ class PrototypeLab:
 
 ################################################################################
 
-    def reset_map(self) -> None:
+    def _reset_map(self) -> None:
         """
 
         """
@@ -185,49 +199,15 @@ class PrototypeLab:
 
 ################################################################################
 
-    def _move_guard(self) -> None:
-        """
-
-        """
-
-        directions = self.DIRECTIONS[self._direction]
-        next_row = directions[self.MOVE_ROW](self._guard_row)
-        next_column = directions[self.MOVE_COLUMN](self._guard_column)
-
-        if 0 <= next_row < self._height and 0 <= next_column < self._width:
-            next_tile = self._map[next_row][next_column]
-
-            if next_tile == self._direction:
-                self._guard_stuck_in_loop = True
-            elif next_tile == self.OBSTRUCTION:
-                self._direction = directions[self.TURN]
-            else:
-                self._guard_row = next_row
-                self._guard_column = next_column
-
-                if self._guard_row == self._guard_start_row and self._guard_column == self._guard_start_column:
-                    if self._new_visited_tiles == 0:
-                        self._guard_stuck_in_loop = True
-                    else:
-                        self._new_visited_tiles = 0
-                if next_tile == self.FREE_SPACE:
-                    self._new_visited_tiles += 1
-                self._map[self._guard_row][self._guard_column] = self._direction
-        else:
-            self._guard_row = None
-            self._guard_column = None
-
-################################################################################
-
-    def _get_potential_obstructions_positions(self) -> None:
+    def _get_relevant_obstructions_positions(self) -> None:
         """
 
         :return:
         """
 
-        self.reset_map()
-        self.walk_guard()
-        self._potential_obstructions_positions = tuple(
+        self._reset_map()
+        self.make_round()
+        self._relevant_obstructions_positions = tuple(
             (row, column)
             for row in range(self._height)
             for column in range(self._width)

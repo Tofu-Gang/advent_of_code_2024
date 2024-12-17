@@ -120,8 +120,8 @@ def puzzle_01() -> int:
     """
 
     prototype_lab = PrototypeLab()
-    prototype_lab.walk_guard()
-    return prototype_lab.visited_positions_count
+    prototype_lab.make_round()
+    return prototype_lab.visited_position_count
 
 
 ################################################################################
@@ -240,18 +240,7 @@ def puzzle_02() -> int:
     obstruction?
     """
 
-    solutions_count = 0
     prototype_lab = PrototypeLab()
-
-    for i in range(len(prototype_lab.potential_obstructions_positions)):
-        row = prototype_lab.potential_obstructions_positions[i][0]
-        column = prototype_lab.potential_obstructions_positions[i][1]
-        prototype_lab.place_obstruction(row, column)
-        prototype_lab.walk_guard()
-
-        if prototype_lab.guard_stuck_in_loop:
-            solutions_count += 1
-        prototype_lab.reset_map()
-    return solutions_count
+    return prototype_lab.make_rounds_with_new_obstructions()
 
 ################################################################################
