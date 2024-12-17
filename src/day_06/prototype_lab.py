@@ -54,6 +54,7 @@ class PrototypeLab:
         self._guard_column = None
         self._direction = self.START_DIRECTION
         self._guard_stuck_in_loop = False
+        self._new_visited_tiles = -1
 
         self._load_map()
         self._potential_obstructions_positions = None
@@ -64,7 +65,7 @@ class PrototypeLab:
 ################################################################################
 
     @property
-    def guard_inside_map(self) -> bool:
+    def _guard_inside_map(self) -> bool:
         """
 
         :return:
@@ -115,12 +116,8 @@ class PrototypeLab:
 
         """
 
-        count = 0
-        while self.guard_inside_map and not self._guard_stuck_in_loop:
+        while self._guard_inside_map and not self._guard_stuck_in_loop:
             self._move_guard()
-            count += 1
-            if count == 1000000:
-                self._guard_stuck_in_loop = True
 
 ################################################################################
 
@@ -161,6 +158,7 @@ class PrototypeLab:
                 if tile in self.DIRECTIONS:
                     self._map[row][column] = self.FREE_SPACE
         self._map[self._guard_row][self._guard_column] = self._direction
+        self._new_visited_tiles = 1
 
 ################################################################################
 
@@ -182,6 +180,7 @@ class PrototypeLab:
                     self._guard_start_column = row.index(self.START_DIRECTION)
                     self._guard_row = i
                     self._guard_column = row.index(self.START_DIRECTION)
+                    self._new_visited_tiles = 1
                     break
 
 ################################################################################
@@ -202,16 +201,18 @@ class PrototypeLab:
                 self._guard_stuck_in_loop = True
             elif next_tile == self.OBSTRUCTION:
                 self._direction = directions[self.TURN]
-
-                if self._direction == self._map[self._guard_row][self._guard_column]:
-                    self._guard_stuck_in_loop = True
             else:
                 self._guard_row = next_row
                 self._guard_column = next_column
-                if self._direction == self._map[self._guard_row][self._guard_column]:
-                    self._guard_stuck_in_loop = True
 
-            self._map[self._guard_row][self._guard_column] = self._direction
+                if self._guard_row == self._guard_start_row and self._guard_column == self._guard_start_column:
+                    if self._new_visited_tiles == 0:
+                        self._guard_stuck_in_loop = True
+                    else:
+                        self._new_visited_tiles = 0
+                if next_tile == self.FREE_SPACE:
+                    self._new_visited_tiles += 1
+                self._map[self._guard_row][self._guard_column] = self._direction
         else:
             self._guard_row = None
             self._guard_column = None

@@ -240,21 +240,12 @@ def puzzle_02() -> int:
     obstruction?
     """
 
-    # prototype_lab = PrototypeLab()
-    # prototype_lab.place_obstruction(11, 60)
-    # prototype_lab.walk_guard()
-    # print(prototype_lab.guard_stuck_in_loop)
-    # return -1
-
     solutions_count = 0
     prototype_lab = PrototypeLab()
-    attempt_count = 0
 
     for i in range(len(prototype_lab.potential_obstructions_positions)):
         row = prototype_lab.potential_obstructions_positions[i][0]
         column = prototype_lab.potential_obstructions_positions[i][1]
-        print(f"{i}/{len(prototype_lab.potential_obstructions_positions)}")
-        attempt_count += 1
         prototype_lab.place_obstruction(row, column)
         prototype_lab.walk_guard()
 
