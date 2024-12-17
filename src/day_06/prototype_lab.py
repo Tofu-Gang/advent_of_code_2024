@@ -86,7 +86,7 @@ class PrototypeLab:
 ################################################################################
 
     @property
-    def visited_positions(self) -> int:
+    def visited_positions_count(self) -> int:
         """
 
         :return:
@@ -95,7 +95,7 @@ class PrototypeLab:
         return sum(
             "".join(row).count(symbol)
             for row in self._map
-            for symbol in (self.NORTH, self.SOUTH, self.EAST, self.WEST))
+            for symbol in self.DIRECTIONS)
 
 ################################################################################
 
@@ -142,11 +142,25 @@ class PrototypeLab:
 
         """
 
-        self._load_map()
+        try:
+            self._map[self._placed_obstruction_row][self._placed_obstruction_column] = self.FREE_SPACE
+            self._placed_obstruction_row = None
+            self._placed_obstruction_column = None
+        except TypeError:
+            pass
+
         self._direction = self.START_DIRECTION
+        self._guard_row = self._guard_start_row
+        self._guard_column = self._guard_start_column
         self._guard_stuck_in_loop = False
-        self._placed_obstruction_row = None
-        self._placed_obstruction_column = None
+
+        for row in range(self._height):
+            for column in range(self._width):
+                tile = self._map[row][column]
+
+                if tile in self.DIRECTIONS:
+                    self._map[row][column] = self.FREE_SPACE
+        self._map[self._guard_row][self._guard_column] = self._direction
 
 ################################################################################
 
@@ -177,29 +191,23 @@ class PrototypeLab:
 
         """
 
-        look_ahead_row = self.DIRECTIONS[self._direction][self.MOVE_ROW](self._guard_row)
-        look_ahead_column = self.DIRECTIONS[self._direction][self.MOVE_COLUMN](self._guard_column)
+        directions = self.DIRECTIONS[self._direction]
+        next_row = directions[self.MOVE_ROW](self._guard_row)
+        next_column = directions[self.MOVE_COLUMN](self._guard_column)
 
-        if (0 <= look_ahead_row < self._height
-                and 0 <= look_ahead_column < self._width):
-            look_ahead_place = self._map[look_ahead_row][look_ahead_column]
-            # if self._placed_obstruction_row == 11 and self._placed_obstruction_column == 60:
-            #     visited = (sum(row.count(self.NORTH) for row in self._map) +
-            #                sum(row.count(self.SOUTH) for row in self._map) +
-            #                sum(row.count(self.EAST) for row in self._map) +
-            #                sum(row.count(self.WEST) for row in self._map))
-            #     print(f"{visited}; {self._direction} {look_ahead_place}")
+        if 0 <= next_row < self._height and 0 <= next_column < self._width:
+            next_tile = self._map[next_row][next_column]
 
-            if look_ahead_place == self._direction:
+            if next_tile == self._direction:
                 self._guard_stuck_in_loop = True
-            elif look_ahead_place == self.OBSTRUCTION:
-                self._direction = self.DIRECTIONS[self._direction][self.TURN]
+            elif next_tile == self.OBSTRUCTION:
+                self._direction = directions[self.TURN]
 
                 if self._direction == self._map[self._guard_row][self._guard_column]:
                     self._guard_stuck_in_loop = True
             else:
-                self._guard_row = look_ahead_row
-                self._guard_column = look_ahead_column
+                self._guard_row = next_row
+                self._guard_column = next_column
                 if self._direction == self._map[self._guard_row][self._guard_column]:
                     self._guard_stuck_in_loop = True
 
@@ -222,6 +230,6 @@ class PrototypeLab:
             (row, column)
             for row in range(self._height)
             for column in range(self._width)
-            if self._map[row][column] in (self.NORTH, self.SOUTH, self.EAST, self.WEST))
+            if self._map[row][column] in self.DIRECTIONS)
 
 ################################################################################

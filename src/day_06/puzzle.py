@@ -121,7 +121,7 @@ def puzzle_01() -> int:
 
     prototype_lab = PrototypeLab()
     prototype_lab.walk_guard()
-    return prototype_lab.visited_positions
+    return prototype_lab.visited_positions_count
 
 
 ################################################################################
