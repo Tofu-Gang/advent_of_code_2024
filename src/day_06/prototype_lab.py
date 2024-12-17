@@ -3,8 +3,6 @@ from typing import Tuple
 
 class PrototypeLab:
     INPUT_FILE_PATH = "src/day_06/input.txt"
-    # INPUT_FILE_PATH = "src/day_06/input_test.txt"
-    GUARD = "^"
     OBSTRUCTION = "#"
     FREE_SPACE = "."
     NORTH = "^"
@@ -47,39 +45,21 @@ class PrototypeLab:
         """
 
         self._map = None
+        self._width = -1
+        self._height = -1
+
         self._guard_start_row = None
         self._guard_start_column = None
         self._guard_row = None
         self._guard_column = None
-        self._load_map()
         self._direction = self.START_DIRECTION
+        self._guard_stuck_in_loop = False
+
+        self._load_map()
         self._potential_obstructions_positions = None
         self._placed_obstruction_row = None
         self._placed_obstruction_column = None
-        self._guard_stuck_in_loop = False
         self._get_potential_obstructions_positions()
-
-################################################################################
-
-    @property
-    def map_width(self) -> int:
-        """
-
-        :return:
-        """
-
-        return len(self._map[0])
-
-################################################################################
-
-    @property
-    def map_height(self) -> int:
-        """
-
-        :return:
-        """
-
-        return len(self._map)
 
 ################################################################################
 
@@ -116,41 +96,6 @@ class PrototypeLab:
             "".join(row).count(symbol)
             for row in self._map
             for symbol in (self.NORTH, self.SOUTH, self.EAST, self.WEST))
-
-################################################################################
-
-    def print_map(self) -> None:
-        """
-
-        """
-
-        print("====================================")
-        for row in range(len(self._map)):
-            print("".join(self._map[row]))
-        print("====================================")
-
-################################################################################
-
-    def is_free_space(self, row: int, column: int) -> bool:
-        """
-
-        :param row:
-        :param column:
-        :return:
-        """
-
-        return self._map[row][column] == self.FREE_SPACE
-
-################################################################################
-
-    @property
-    def free_space_count(self) -> int:
-        """
-
-        :return:
-        """
-
-        return sum("".join(row).count(self.FREE_SPACE) for row in self._map)
 
 ################################################################################
 
@@ -212,15 +157,17 @@ class PrototypeLab:
 
         with open(self.INPUT_FILE_PATH, "r") as f:
             self._map = list(list(row.strip()) for row in f.readlines())
+            self._height = len(self._map)
+            self._width = len(self._map[0])
 
             for i in range(len(self._map)):
                 row = self._map[i]
 
-                if self.GUARD in row:
+                if self.START_DIRECTION in row:
                     self._guard_start_row = i
-                    self._guard_start_column = row.index(self.GUARD)
+                    self._guard_start_column = row.index(self.START_DIRECTION)
                     self._guard_row = i
-                    self._guard_column = row.index(self.GUARD)
+                    self._guard_column = row.index(self.START_DIRECTION)
                     break
 
 ################################################################################
@@ -233,8 +180,8 @@ class PrototypeLab:
         look_ahead_row = self.DIRECTIONS[self._direction][self.MOVE_ROW](self._guard_row)
         look_ahead_column = self.DIRECTIONS[self._direction][self.MOVE_COLUMN](self._guard_column)
 
-        if (0 <= look_ahead_row < self.map_height
-                and 0 <= look_ahead_column < self.map_width):
+        if (0 <= look_ahead_row < self._height
+                and 0 <= look_ahead_column < self._width):
             look_ahead_place = self._map[look_ahead_row][look_ahead_column]
             # if self._placed_obstruction_row == 11 and self._placed_obstruction_column == 60:
             #     visited = (sum(row.count(self.NORTH) for row in self._map) +
@@ -273,8 +220,8 @@ class PrototypeLab:
         self.walk_guard()
         self._potential_obstructions_positions = tuple(
             (row, column)
-            for row in range(self.map_height)
-            for column in range(self.map_width)
+            for row in range(self._height)
+            for column in range(self._width)
             if self._map[row][column] in (self.NORTH, self.SOUTH, self.EAST, self.WEST))
 
 ################################################################################
